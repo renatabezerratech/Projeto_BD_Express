@@ -6,22 +6,34 @@ const mysql = require('mysql2');
 //cria o express.application
 const app = express();
 
-// cria uma conexão com o BD
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    database: 'bb',
-    password: '250904'
-  });
+const dataBase = 'bb' // Nome do dataBase
 
-  connection.query(
-    'SELECT * FROM test',
-    function(err, results, fields) {
-      console.log(results); // results contains rows returned by server
-      console.log(fields); // fields contains extra meta data about results, if available
-      console.error(err);
-    }
-  );
+// cria uma conexão com o BD
+const connection = mysql.createPool({ // Cria uma coneção deixando-os abertos em vez de fechados quando você terminar de usá-los, pois createConnection não da para fazer getConnection pq ele fecha a conexão depois de usada.
+  host: 'localhost', // Esta na maquina
+  user: 'root', // Usuario que tem acesso ao banco de bados
+  database: dataBase, // nome do banco
+  password: '250904' // Senha
+});
+
+connection.getConnection(function(err, conn) { // Pega a conexão e verifica:
+  if(conn != null){ // Se conectado
+    console.log(`Banco ${dataBase} Conectado`); 
+    connection.query( // Faz uma query para banco de bados
+      'SELECT * FROM tabela_1',
+      function(err, results, fields) {
+        if(results != null){
+          console.log(results); // printa o resultado sucedido da query acima.
+          // console.log(fields); // printa outras informações (metadados) da query bem sucedida.
+        }else{
+          console.error(err);// se a query for mal sucedida printa o erro.
+        }
+    });
+  }else{
+    console.error(err);// se conexão foi mal sucedida printa o erro.
+  }
+});
+
 
 //método para ouvir as requisições e a porta onde o server vai rodar
 app.listen(3000, () => console.log("Server roda na porta 3000") );
